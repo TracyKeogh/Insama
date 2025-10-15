@@ -3,6 +3,7 @@ import { Users, CheckCircle, AlertTriangle, Clock, Link, Copy, Share2, Euro, Bar
 import { CollaborativeSession, PartnerResponse, Conflict, InsamaCard, HouseholdBill, Partner } from '../types';
 import { defaultBills } from '../data/defaultBills';
 import { insamaCards } from '../data/insamaCards';
+import { sessionStorage } from '../services/sessionStorage';
 
 interface CollaborativeSessionManagerProps {
   partner1: Partner;
@@ -20,27 +21,31 @@ export const CollaborativeSessionManager: React.FC<CollaborativeSessionManagerPr
   const [showConflictResolution, setShowConflictResolution] = useState(false);
 
   useEffect(() => {
-    // Check URL parameters to determine which partner is accessing
-    const urlParams = new URLSearchParams(window.location.search);
-    const sessionId = urlParams.get('session');
-    const partnerId = urlParams.get('partner');
-    
-    if (sessionId && partnerId) {
-      // Load existing session
-      const existingSession = loadSession(sessionId);
-      if (existingSession) {
-        setSession(existingSession);
-        setCurrentPartner(partnerId as 'partner1' | 'partner2');
+    const initializeSession = async () => {
+      // Check URL parameters to determine which partner is accessing
+      const urlParams = new URLSearchParams(window.location.search);
+      const sessionId = urlParams.get('session');
+      const partnerId = urlParams.get('partner');
+      
+      if (sessionId && partnerId) {
+        // Load existing session
+        const existingSession = await loadSession(sessionId);
+        if (existingSession) {
+          setSession(existingSession);
+          setCurrentPartner(partnerId as 'partner1' | 'partner2');
+        }
+      } else {
+        // Create new collaborative session
+        const newSession = await createNewSession();
+        setSession(newSession);
+        setCurrentPartner('partner1'); // Default to partner1 for setup
       }
-    } else {
-      // Create new collaborative session
-      const newSession = createNewSession();
-      setSession(newSession);
-      setCurrentPartner('partner1'); // Default to partner1 for setup
-    }
+    };
+
+    initializeSession();
   }, []);
 
-  const createNewSession = (): CollaborativeSession => {
+  const createNewSession = async (): Promise<CollaborativeSession> => {
     const sessionId = `collab-${Date.now()}`;
     const newSession: CollaborativeSession = {
       id: sessionId,
@@ -51,19 +56,28 @@ export const CollaborativeSessionManager: React.FC<CollaborativeSessionManagerPr
       status: 'active'
     };
     
-    // Save to localStorage
-    localStorage.setItem(`collab-session-${sessionId}`, JSON.stringify(newSession));
+    // Save to production storage
+    await sessionStorage.saveSession(sessionId, newSession);
     return newSession;
   };
 
-  const loadSession = (sessionId: string): CollaborativeSession | null => {
-    const saved = localStorage.getItem(`collab-session-${sessionId}`);
-    return saved ? JSON.parse(saved) : null;
+  const loadSession = async (sessionId: string): Promise<CollaborativeSession | null> => {
+    try {
+      return await sessionStorage.loadSession(sessionId);
+    } catch (error) {
+      console.error('Failed to load session:', error);
+      return null;
+    }
   };
 
-  const saveSession = (updatedSession: CollaborativeSession) => {
-    localStorage.setItem(`collab-session-${updatedSession.id}`, JSON.stringify(updatedSession));
-    setSession(updatedSession);
+  const saveSession = async (updatedSession: CollaborativeSession) => {
+    try {
+      await sessionStorage.saveSession(updatedSession.id, updatedSession);
+      setSession(updatedSession);
+    } catch (error) {
+      console.error('Failed to save session:', error);
+      // You might want to show an error message to the user here
+    }
   };
 
   const generatePartnerLink = (partnerId: 'partner1' | 'partner2'): string => {

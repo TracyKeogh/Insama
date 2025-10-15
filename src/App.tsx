@@ -6,6 +6,7 @@ import { IndividualModeSelector } from './components/IndividualModeSelector';
 import { CollaborativeSessionManager } from './components/CollaborativeSessionManager';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { InsamaCard, Partner, Couple, CheckInSession, HouseholdBill, CollaborativeSession } from './types';
+import { sessionStorage } from './services/sessionStorage';
 
 function App() {
   const [couple, setCouple] = useLocalStorage<Couple | null>('insamaCouple', null);
@@ -22,10 +23,9 @@ function App() {
     // Check if this is a shared collaborative session result
     if (sessionId && isShared === 'true') {
       // Load the collaborative session and convert to couple data
-      const savedSession = localStorage.getItem(`collab-session-${sessionId}`);
-      if (savedSession) {
-        const session = JSON.parse(savedSession);
-        if (session.status === 'merged' && session.mergedData) {
+      try {
+        const session = await sessionStorage.loadSession(sessionId);
+        if (session && session.status === 'merged' && session.mergedData) {
           // Convert to couple data and show dashboard
           const newCouple: Couple = {
             id: session.coupleId,
@@ -41,6 +41,8 @@ function App() {
           setCurrentStep('dashboard');
           return;
         }
+      } catch (error) {
+        console.error('Failed to load shared session:', error);
       }
     }
     
