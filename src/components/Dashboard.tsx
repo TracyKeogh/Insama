@@ -199,6 +199,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             onUpdateBill={handleUpdateBill}
             onAddBill={handleAddBill}
             onDeleteBill={handleDeleteBill}
+            onLoadSampleBills={addDefaultBills}
           />
         )}
 

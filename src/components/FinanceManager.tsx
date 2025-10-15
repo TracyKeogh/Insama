@@ -8,6 +8,7 @@ interface FinanceManagerProps {
   onUpdateBill: (billId: string, updates: Partial<HouseholdBill>) => void;
   onAddBill: (bill: Omit<HouseholdBill, 'id' | 'createdAt'>) => void;
   onDeleteBill: (billId: string) => void;
+  onLoadSampleBills?: () => void;
 }
 
 const categoryInfo = {
@@ -30,6 +31,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
   onUpdateBill,
   onAddBill,
   onDeleteBill,
+  onLoadSampleBills,
 }) => {
   const [filter, setFilter] = useState<'all' | BillCategory | 'unassigned' | 'shared'>('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -305,13 +307,24 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
             </select>
           </div>
           
-          <button
-            onClick={() => setShowAddForm(true)}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2"
-          >
-            <Plus className="h-4 w-4" />
-            <span>Add Bill</span>
-          </button>
+          <div className="flex space-x-3">
+            {onLoadSampleBills && (
+              <button
+                onClick={onLoadSampleBills}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+              >
+                <DollarSign className="h-4 w-4" />
+                <span>Load Sample Bills</span>
+              </button>
+            )}
+            <button
+              onClick={() => setShowAddForm(true)}
+              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Add Bill</span>
+            </button>
+          </div>
         </div>
       </div>
 
