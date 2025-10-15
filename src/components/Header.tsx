@@ -59,8 +59,13 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <button 
-            onClick={onStartOver}
-            disabled={!onStartOver}
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              if (onStartOver) {
+                onStartOver();
+              }
+            }}
             className={`flex items-center space-x-3 transition-opacity ${
               onStartOver ? 'hover:opacity-80 cursor-pointer' : 'cursor-default'
             } group`}
