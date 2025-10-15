@@ -220,11 +220,99 @@ class SupabaseSessionStorage implements SessionStorageService {
   }
 }
 
+// URL-based storage (no server needed)
+class URLSessionStorage implements SessionStorageService {
+  async saveSession(sessionId: string, data: any): Promise<void> {
+    // Store in URL parameters
+    const encoded = btoa(JSON.stringify(data));
+    const newURL = `${window.location.origin}${window.location.pathname}?session=${sessionId}&data=${encoded}`;
+    window.history.replaceState({}, '', newURL);
+  }
+
+  async loadSession(sessionId: string): Promise<any> {
+    const urlParams = new URLSearchParams(window.location.search);
+    const data = urlParams.get('data');
+    if (!data) return null;
+    
+    try {
+      return JSON.parse(atob(data));
+    } catch {
+      return null;
+    }
+  }
+
+  async updateSession(sessionId: string, updates: any): Promise<void> {
+    const existing = await this.loadSession(sessionId);
+    if (!existing) throw new Error('Session not found');
+    
+    await this.saveSession(sessionId, { ...existing, ...updates });
+  }
+
+  async deleteSession(sessionId: string): Promise<void> {
+    // Clear URL parameters
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+}
+
+// Simple API storage (for the Express server)
+class APISessionStorage implements SessionStorageService {
+  private baseURL: string;
+
+  constructor(baseURL: string) {
+    this.baseURL = baseURL;
+  }
+
+  async saveSession(sessionId: string, data: any): Promise<void> {
+    const response = await fetch(`${this.baseURL}/api/sessions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId, data })
+    });
+    
+    if (!response.ok) throw new Error('Failed to save session');
+  }
+
+  async loadSession(sessionId: string): Promise<any> {
+    const response = await fetch(`${this.baseURL}/api/sessions/${sessionId}`);
+    if (!response.ok) throw new Error('Failed to load session');
+    
+    return response.json();
+  }
+
+  async updateSession(sessionId: string, updates: any): Promise<void> {
+    const response = await fetch(`${this.baseURL}/api/sessions/${sessionId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: updates })
+    });
+    
+    if (!response.ok) throw new Error('Failed to update session');
+  }
+
+  async deleteSession(sessionId: string): Promise<void> {
+    const response = await fetch(`${this.baseURL}/api/sessions/${sessionId}`, {
+      method: 'DELETE'
+    });
+    
+    if (!response.ok) throw new Error('Failed to delete session');
+  }
+}
+
 // Factory function to create the appropriate storage service
-export function createSessionStorage(provider: 'local' | 'firebase' | 'supabase', config?: any): SessionStorageService {
+export function createSessionStorage(
+  provider: 'local' | 'firebase' | 'supabase' | 'url' | 'api', 
+  config?: any
+): SessionStorageService {
   switch (provider) {
     case 'local':
       return new LocalSessionStorage();
+    case 'url':
+      return new URLSessionStorage();
+    case 'api':
+      if (!config?.baseURL) {
+        throw new Error('API base URL required');
+      }
+      return new APISessionStorage(config.baseURL);
     case 'firebase':
       if (!config?.firebaseApp) {
         throw new Error('Firebase app instance required');
