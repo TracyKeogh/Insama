@@ -63,9 +63,7 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              console.log('Logo clicked!', { onStartOver: !!onStartOver });
               if (onStartOver) {
-                console.log('Calling onStartOver...');
                 onStartOver();
               }
             }}
