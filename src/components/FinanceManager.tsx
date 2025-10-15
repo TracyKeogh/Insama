@@ -37,6 +37,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingBill, setEditingBill] = useState<string | null>(null);
+  const [editingAmount, setEditingAmount] = useState<string>('');
   const [newBill, setNewBill] = useState<Omit<HouseholdBill, 'id' | 'createdAt'>>({
     name: '',
     category: 'other',
@@ -190,6 +191,25 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
         splitPercentage: undefined 
       });
     }
+  };
+
+  const handleAmountEdit = (billId: string, currentAmount: number) => {
+    setEditingBill(billId);
+    setEditingAmount(currentAmount.toString());
+  };
+
+  const handleAmountSave = (billId: string) => {
+    const amount = parseFloat(editingAmount);
+    if (!isNaN(amount) && amount >= 0) {
+      onUpdateBill(billId, { amount });
+    }
+    setEditingBill(null);
+    setEditingAmount('');
+  };
+
+  const handleAmountCancel = () => {
+    setEditingBill(null);
+    setEditingAmount('');
   };
 
   const formatCurrency = (amount: number) => {
@@ -440,7 +460,52 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
                 <div className="space-y-1 text-sm text-gray-600">
                   <div className="flex items-center space-x-2">
                     <Euro className="h-4 w-4" />
-                    <span className="font-semibold text-lg text-gray-900">{formatCurrency(bill.amount)}</span>
+                    {editingBill === bill.id ? (
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="number"
+                          value={editingAmount}
+                          onChange={(e) => setEditingAmount(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              handleAmountSave(bill.id);
+                            } else if (e.key === 'Escape') {
+                              handleAmountCancel();
+                            }
+                          }}
+                          className="w-20 px-2 py-1 border border-gray-300 rounded text-sm font-semibold text-gray-900"
+                          placeholder="0.00"
+                          min="0"
+                          step="0.01"
+                          autoFocus
+                        />
+                        <button
+                          onClick={() => handleAmountSave(bill.id)}
+                          className="p-1 text-green-600 hover:text-green-700"
+                          title="Save amount"
+                        >
+                          <CheckCircle className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={handleAmountCancel}
+                          className="p-1 text-gray-400 hover:text-gray-600"
+                          title="Cancel"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center space-x-2">
+                        <span 
+                          className="font-semibold text-lg text-gray-900 cursor-pointer hover:text-blue-600 transition-colors"
+                          onClick={() => handleAmountEdit(bill.id, bill.amount)}
+                          title="Click to edit amount"
+                        >
+                          {formatCurrency(bill.amount)}
+                        </span>
+                        <Edit3 className="h-3 w-3 text-gray-400 cursor-pointer hover:text-blue-600" onClick={() => handleAmountEdit(bill.id, bill.amount)} />
+                      </div>
+                    )}
                     <span>/ {formatFrequency(bill.frequency)}</span>
                   </div>
                   <div className="flex items-center space-x-2">
