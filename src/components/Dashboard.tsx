@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Plus, BarChart3, MessageCircle, Users, DollarSign } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, BarChart3, MessageCircle, Users, Euro } from 'lucide-react';
 import { InsamaCard, Partner, CheckInSession, HouseholdBill } from '../types';
 import { CardDeck } from './CardDeck';
 import { OwnershipTracker } from './OwnershipTracker';
@@ -85,6 +85,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
     onUpdateBills([...bills, ...newBills]);
   };
 
+  // Auto-load sample bills on first visit
+  useEffect(() => {
+    if (bills.length === 0) {
+      addDefaultBills();
+    }
+  }, [bills.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const lastCheckIn = checkIns.length > 0 ? checkIns[checkIns.length - 1].date : undefined;
 
   if (cards.length === 0 && bills.length === 0) {
@@ -121,7 +128,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   onClick={addDefaultBills}
                   className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-2 mx-auto text-lg"
                 >
-                  <DollarSign className="h-6 w-6" />
+                  <Euro className="h-6 w-6" />
                   <span>Add Bills</span>
                 </button>
               </div>
@@ -152,7 +159,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   const tabs = [
     { id: 'cards' as const, label: 'Task Cards', icon: Users },
-    { id: 'finances' as const, label: 'Finances', icon: DollarSign },
+    { id: 'finances' as const, label: 'Finances', icon: Euro },
     { id: 'tracker' as const, label: 'Ownership Tracker', icon: BarChart3 },
     { id: 'checkin' as const, label: 'Check-In Ritual', icon: MessageCircle },
   ];

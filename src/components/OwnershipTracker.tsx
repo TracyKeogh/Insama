@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { BarChart3, Users, AlertTriangle, CheckCircle, Brain, Calendar, CheckSquare, Clock, TrendingUp, Target, Award, Zap, PieChart, Frown, Meh, Smile, Heart, DollarSign, CreditCard, TrendingDown, Minus } from 'lucide-react';
+import { BarChart3, Users, AlertTriangle, CheckCircle, Brain, Calendar, CheckSquare, Clock, TrendingUp, Target, Award, Zap, PieChart, Frown, Meh, Smile, Heart, Euro, CreditCard, TrendingDown, Minus } from 'lucide-react';
 import { InsamaCard, HouseholdBill } from '../types';
 
 interface OwnershipTrackerProps {
@@ -248,7 +248,7 @@ export const OwnershipTracker: React.FC<OwnershipTrackerProps> = ({
           {/* Finance Summary */}
           <div className="space-y-6">
             <div className="flex items-center space-x-3">
-              <DollarSign className="h-5 w-5 text-green-600" />
+              <Euro className="h-5 w-5 text-green-600" />
               <h3 className="text-xl font-semibold text-gray-900">Financial Responsibilities</h3>
             </div>
             
@@ -414,7 +414,7 @@ export const OwnershipTracker: React.FC<OwnershipTrackerProps> = ({
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
-                <DollarSign className={`h-8 w-8 ${
+                <Euro className={`h-8 w-8 ${
                   financeAnalysis.totalBills === 0 ? 'text-gray-400' : 
                   financeAnalysis.isFinanciallyBalanced ? 'text-green-600' : 'text-red-600'
                 }`} />

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { DollarSign, Plus, Search, Filter, PieChart, TrendingUp, Calendar, CreditCard, Users, AlertCircle, CheckCircle, Edit3, Save, X, Trash2 } from 'lucide-react';
+import { Euro, Plus, Search, Filter, PieChart, TrendingUp, Calendar, CreditCard, Users, AlertCircle, CheckCircle, Edit3, Save, X, Trash2 } from 'lucide-react';
 import { HouseholdBill, BillCategory } from '../types';
 
 interface FinanceManagerProps {
@@ -208,7 +208,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
       {/* Financial Overview */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
         <div className="flex items-center space-x-3 mb-6">
-          <DollarSign className="h-6 w-6 text-green-600" />
+          <Euro className="h-6 w-6 text-green-600" />
           <h2 className="text-2xl font-bold text-gray-900">Financial Overview</h2>
         </div>
 
@@ -313,7 +313,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
                 onClick={onLoadSampleBills}
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
               >
-                <DollarSign className="h-4 w-4" />
+                <Euro className="h-4 w-4" />
                 <span>Load Sample Bills</span>
               </button>
             )}
@@ -439,7 +439,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
                 
                 <div className="space-y-1 text-sm text-gray-600">
                   <div className="flex items-center space-x-2">
-                    <DollarSign className="h-4 w-4" />
+                    <Euro className="h-4 w-4" />
                     <span className="font-semibold text-lg text-gray-900">{formatCurrency(bill.amount)}</span>
                     <span>/ {formatFrequency(bill.frequency)}</span>
                   </div>
@@ -523,7 +523,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
       {filteredBills.length === 0 && (
         <div className="text-center py-12">
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <DollarSign className="h-8 w-8 text-gray-400" />
+            <Euro className="h-8 w-8 text-gray-400" />
           </div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">No bills found</h3>
           <p className="text-gray-600">Try adjusting your filters or add a new bill.</p>
