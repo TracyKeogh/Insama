@@ -58,9 +58,16 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="bg-white shadow-sm border-b border-gray-100">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div className="flex items-center space-x-3">
+          <button 
+            onClick={onStartOver}
+            disabled={!onStartOver}
+            className={`flex items-center space-x-3 transition-opacity ${
+              onStartOver ? 'hover:opacity-80 cursor-pointer' : 'cursor-default'
+            } group`}
+            title={onStartOver ? "Go to home" : "Insama"}
+          >
             <div className="relative">
-              <Heart className="h-8 w-8 text-rose-500" fill="currentColor" />
+              <Heart className="h-8 w-8 text-rose-500 group-hover:text-rose-600 transition-colors" fill="currentColor" />
               <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
                 {mode === 'individual' ? (
                   <UserCheck className="h-2.5 w-2.5 text-white" />
@@ -70,7 +77,7 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Insama</h1>
+              <h1 className="text-xl font-bold text-gray-900 group-hover:text-rose-600 transition-colors">Insama</h1>
               {currentStep && (
                 <div className="flex items-center space-x-2">
                   <p className="text-sm text-gray-500">{currentStep}</p>
@@ -87,7 +94,7 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
               )}
             </div>
-          </div>
+          </button>
           
           <div className="flex items-center space-x-4">
             {partnerNames && (
