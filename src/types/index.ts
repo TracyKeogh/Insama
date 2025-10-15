@@ -111,3 +111,46 @@ export interface IndividualSession {
   coupleId: string;
   isWaitingForPartner?: boolean;
 }
+
+export interface CollaborativeSession {
+  id: string;
+  coupleId: string;
+  partner1: Partner;
+  partner2: Partner;
+  createdAt: Date;
+  status: 'active' | 'completed' | 'merged';
+  
+  // Individual partner responses
+  partner1Response?: PartnerResponse;
+  partner2Response?: PartnerResponse;
+  
+  // Conflicts detected
+  conflicts?: Conflict[];
+  
+  // Final merged data
+  mergedData?: {
+    cards: InsamaCard[];
+    bills: HouseholdBill[];
+  };
+}
+
+export interface PartnerResponse {
+  partnerId: string;
+  completedAt: Date;
+  cards: InsamaCard[];
+  bills: HouseholdBill[];
+  isComplete: boolean;
+}
+
+export interface Conflict {
+  id: string;
+  type: 'card_ownership' | 'bill_responsibility' | 'amount_mismatch';
+  itemId: string; // card or bill id
+  itemName: string;
+  partner1Choice: any;
+  partner2Choice: any;
+  resolution?: 'partner1' | 'partner2' | 'shared' | 'custom';
+  customResolution?: any;
+  resolvedBy?: string;
+  resolvedAt?: Date;
+}

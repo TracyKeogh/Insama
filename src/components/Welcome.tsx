@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { Heart, ArrowRight, Users, CheckCircle, BarChart3, Calendar, UserCheck, UsersIcon, Play, Pause, Volume2, VolumeX, Zap } from 'lucide-react';
 
 interface WelcomeProps {
-  onContinue: (partner1: string, partner2: string, mode: 'together' | 'individual') => void;
+  onContinue: (partner1: string, partner2: string, mode: 'together' | 'individual' | 'collaborative') => void;
 }
 
 export const Welcome: React.FC<WelcomeProps> = ({ onContinue }) => {
   const [step, setStep] = useState<'intro' | 'mode-selection' | 'together-form' | 'individual-form'>('intro');
-  const [selectedMode, setSelectedMode] = useState<'together' | 'individual' | null>(null);
+  const [selectedMode, setSelectedMode] = useState<'together' | 'individual' | 'collaborative' | null>(null);
   const [partner1, setPartner1] = useState('');
   const [partner2, setPartner2] = useState('');
   const [currentPartnerName, setCurrentPartnerName] = useState('');
@@ -15,12 +15,15 @@ export const Welcome: React.FC<WelcomeProps> = ({ onContinue }) => {
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
 
-  const handleModeSelection = (mode: 'together' | 'individual') => {
+  const handleModeSelection = (mode: 'together' | 'individual' | 'collaborative') => {
     setSelectedMode(mode);
     if (mode === 'together') {
       setStep('together-form');
-    } else {
+    } else if (mode === 'individual') {
       setStep('individual-form');
+    } else {
+      // Collaborative mode - go directly without forms
+      onContinue('Partner 1', 'Partner 2', 'collaborative');
     }
   };
 
@@ -61,7 +64,7 @@ export const Welcome: React.FC<WelcomeProps> = ({ onContinue }) => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-3 gap-8">
             {/* Together Mode */}
             <div 
               onClick={() => handleModeSelection('together')}
@@ -138,6 +141,46 @@ export const Welcome: React.FC<WelcomeProps> = ({ onContinue }) => {
 
                 <div className="mt-6 p-3 bg-green-50 rounded-lg">
                   <p className="text-sm text-green-800 font-medium">Best for: Those who want unbiased, independent input</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Collaborative Mode */}
+            <div 
+              onClick={() => handleModeSelection('collaborative')}
+              className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-200 border-2 border-transparent hover:border-purple-200 cursor-pointer group"
+            >
+              <div className="text-center">
+                <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-purple-200 transition-colors">
+                  <Users className="h-8 w-8 text-purple-600" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">Collaborative Mode</h3>
+                <p className="text-gray-600 mb-6 leading-relaxed">
+                  Each partner works independently on their own link. The app detects conflicts 
+                  and creates a summary for you to resolve together.
+                </p>
+                
+                <div className="space-y-3 text-left">
+                  <div className="flex items-center space-x-3">
+                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <span className="text-sm text-gray-700">Work at your own pace</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <span className="text-sm text-gray-700">Automatic conflict detection</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <span className="text-sm text-gray-700">Structured conflict resolution</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <span className="text-sm text-gray-700">No need to be together</span>
+                  </div>
+                </div>
+
+                <div className="mt-6 p-3 bg-purple-50 rounded-lg">
+                  <p className="text-sm text-purple-800 font-medium">Best for: Remote couples or busy schedules</p>
                 </div>
               </div>
             </div>

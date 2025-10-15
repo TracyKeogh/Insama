@@ -3,23 +3,31 @@ import { Header } from './components/Header';
 import { Welcome } from './components/Welcome';
 import { Dashboard } from './components/Dashboard';
 import { IndividualModeSelector } from './components/IndividualModeSelector';
+import { CollaborativeSessionManager } from './components/CollaborativeSessionManager';
 import { useLocalStorage } from './hooks/useLocalStorage';
-import { InsamaCard, Partner, Couple, CheckInSession, HouseholdBill } from './types';
+import { InsamaCard, Partner, Couple, CheckInSession, HouseholdBill, CollaborativeSession } from './types';
 
 function App() {
   const [couple, setCouple] = useLocalStorage<Couple | null>('insamaCouple', null);
-  const [currentStep, setCurrentStep] = useState<'welcome' | 'individual-selector' | 'dashboard'>('welcome');
+  const [currentStep, setCurrentStep] = useState<'welcome' | 'individual-selector' | 'dashboard' | 'collaborative'>('welcome');
   const [currentPartnerId, setCurrentPartnerId] = useState<string | null>(null);
 
-  // Check URL for individual mode parameters
+  // Check URL for session parameters
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('session');
     const partnerId = urlParams.get('partner');
     
-    if (sessionId && partnerId && couple) {
-      // Validate that this is the correct session
-      if (couple.id === sessionId && (partnerId === 'partner1' || partnerId === 'partner2')) {
+    // Check if this is a collaborative session
+    if (sessionId && partnerId) {
+      // Check if it's a collaborative session (starts with 'collab-')
+      if (sessionId.startsWith('collab-')) {
+        setCurrentStep('collaborative');
+        return;
+      }
+      
+      // Check if it's a regular couple session
+      if (couple && couple.id === sessionId && (partnerId === 'partner1' || partnerId === 'partner2')) {
         setCurrentPartnerId(partnerId);
         setCurrentStep('dashboard');
         return;
@@ -42,7 +50,11 @@ function App() {
     }
   }, [couple]);
 
-  const handleCreateCouple = (partner1Name: string, partner2Name: string, mode: 'together' | 'individual') => {
+  const handleCreateCouple = (partner1Name: string, partner2Name: string, mode: 'together' | 'individual' | 'collaborative') => {
+    if (mode === 'collaborative') {
+      setCurrentStep('collaborative');
+      return;
+    }
     const newCouple: Couple = {
       id: `couple-${Date.now()}`,
       partner1: {
@@ -167,6 +179,23 @@ function App() {
     return `${window.location.origin}${window.location.pathname}?session=${couple.id}&partner=${partnerId}`;
   };
 
+  const handleCollaborativeSessionComplete = (session: CollaborativeSession) => {
+    // Convert collaborative session to regular couple data
+    const newCouple: Couple = {
+      id: session.coupleId,
+      partner1: session.partner1,
+      partner2: session.partner2,
+      mode: 'together',
+      createdAt: session.createdAt,
+      cards: session.mergedData?.cards || [],
+      bills: session.mergedData?.bills || [],
+      checkIns: [],
+    };
+    
+    setCouple(newCouple);
+    setCurrentStep('dashboard');
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {couple && (
@@ -202,6 +231,14 @@ function App() {
           onUpdateCards={handleUpdateCards}
           onUpdateBills={handleUpdateBills}
           onSaveCheckIn={handleSaveCheckIn}
+        />
+      )}
+
+      {currentStep === 'collaborative' && (
+        <CollaborativeSessionManager
+          partner1={{ id: 'partner1', name: 'Partner 1', email: '' }}
+          partner2={{ id: 'partner2', name: 'Partner 2', email: '' }}
+          onSessionComplete={handleCollaborativeSessionComplete}
         />
       )}
     </div>
