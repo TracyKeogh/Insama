@@ -203,7 +203,17 @@ export const CollaborativeSessionManager: React.FC<CollaborativeSessionManagerPr
     };
 
     saveSession(finalizedSession);
-    onSessionComplete(finalizedSession);
+    
+    // Generate shared link for final result
+    const sharedLink = generateSharedLink(finalizedSession);
+    
+    // Show final result with shared link
+    setShowConflictResolution(false);
+    setSession({ ...finalizedSession, sharedLink });
+  };
+
+  const generateSharedLink = (session: CollaborativeSession): string => {
+    return `${window.location.origin}${window.location.pathname}?session=${session.id}&shared=true`;
   };
 
   const mergeCards = (session: CollaborativeSession): InsamaCard[] => {
@@ -218,6 +228,16 @@ export const CollaborativeSessionManager: React.FC<CollaborativeSessionManagerPr
 
   if (!session) {
     return <div>Loading...</div>;
+  }
+
+  // Show final result with shared link if session is merged
+  if (session.status === 'merged') {
+    return (
+      <FinalResultPage 
+        session={session}
+        onComplete={onSessionComplete}
+      />
+    );
   }
 
   // Show conflict resolution if both partners completed
@@ -594,6 +614,98 @@ const ConflictCard: React.FC<{
         >
           Make Shared
         </button>
+      </div>
+    </div>
+  );
+};
+
+// Component for final result with shared link
+const FinalResultPage: React.FC<{
+  session: CollaborativeSession & { sharedLink?: string };
+  onComplete: (session: CollaborativeSession) => void;
+}> = ({ session, onComplete }) => {
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      // You could add a toast notification here
+    } catch (err) {
+      console.error('Failed to copy: ', err);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 pt-16">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="text-center">
+          <div className="bg-white rounded-3xl p-12 shadow-lg border border-gray-100">
+            <div className="text-6xl mb-6">🎉</div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Collaborative Setup Complete!</h2>
+            <p className="text-gray-600 mb-8 max-w-2xl mx-auto text-lg">
+              Both partners have completed their sections and all conflicts have been resolved. 
+              Your household setup is ready to use!
+            </p>
+            
+            <div className="bg-green-50 p-6 rounded-lg border border-green-200 mb-8">
+              <h3 className="font-semibold text-green-900 mb-4">📋 Summary</h3>
+              <div className="grid md:grid-cols-2 gap-4 text-sm text-green-800">
+                <div>
+                  <strong>Task Cards:</strong> {session.mergedData?.cards.length || 0} cards assigned
+                </div>
+                <div>
+                  <strong>Household Bills:</strong> {session.mergedData?.bills.length || 0} bills managed
+                </div>
+                <div>
+                  <strong>Conflicts Resolved:</strong> {session.conflicts?.length || 0} conflicts resolved
+                </div>
+                <div>
+                  <strong>Partners:</strong> {session.partner1.name} & {session.partner2.name}
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-blue-50 p-6 rounded-lg border border-blue-200 mb-8">
+              <h3 className="font-semibold text-blue-900 mb-4">🔗 Shared Access Link</h3>
+              <p className="text-blue-700 mb-4">
+                Share this link with your partner so you can both access your complete household setup:
+              </p>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="text"
+                  value={session.sharedLink || ''}
+                  readOnly
+                  className="flex-1 px-3 py-2 text-sm bg-white border border-blue-200 rounded"
+                />
+                <button
+                  onClick={() => copyToClipboard(session.sharedLink || '')}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center space-x-2"
+                >
+                  <Copy className="h-4 w-4" />
+                  <span>Copy</span>
+                </button>
+              </div>
+              <p className="text-xs text-blue-600 mt-2">
+                Both partners can use this link to access the complete dashboard
+              </p>
+            </div>
+
+            <div className="flex space-x-4 justify-center">
+              <button
+                onClick={() => onComplete(session)}
+                className="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2"
+              >
+                <CheckCircle className="h-5 w-5" />
+                <span>Access My Dashboard</span>
+              </button>
+              <button
+                onClick={() => copyToClipboard(session.sharedLink || '')}
+                className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+              >
+                <Share2 className="h-5 w-5" />
+                <span>Share with Partner</span>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

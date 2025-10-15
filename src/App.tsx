@@ -17,6 +17,32 @@ function App() {
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('session');
     const partnerId = urlParams.get('partner');
+    const isShared = urlParams.get('shared');
+    
+    // Check if this is a shared collaborative session result
+    if (sessionId && isShared === 'true') {
+      // Load the collaborative session and convert to couple data
+      const savedSession = localStorage.getItem(`collab-session-${sessionId}`);
+      if (savedSession) {
+        const session = JSON.parse(savedSession);
+        if (session.status === 'merged' && session.mergedData) {
+          // Convert to couple data and show dashboard
+          const newCouple: Couple = {
+            id: session.coupleId,
+            partner1: session.partner1,
+            partner2: session.partner2,
+            mode: 'together',
+            createdAt: session.createdAt,
+            cards: session.mergedData.cards || [],
+            bills: session.mergedData.bills || [],
+            checkIns: [],
+          };
+          setCouple(newCouple);
+          setCurrentStep('dashboard');
+          return;
+        }
+      }
+    }
     
     // Check if this is a collaborative session
     if (sessionId && partnerId) {
