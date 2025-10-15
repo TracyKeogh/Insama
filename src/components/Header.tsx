@@ -62,13 +62,16 @@ export const Header: React.FC<HeaderProps> = ({
             type="button"
             onClick={(e) => {
               e.preventDefault();
+              e.stopPropagation();
+              console.log('Logo clicked!', { onStartOver: !!onStartOver });
               if (onStartOver) {
+                console.log('Calling onStartOver...');
                 onStartOver();
               }
             }}
             className={`flex items-center space-x-3 transition-opacity ${
               onStartOver ? 'hover:opacity-80 cursor-pointer' : 'cursor-default'
-            } group`}
+            } group relative z-50`}
             title={onStartOver ? "Go to home" : "Insama"}
           >
             <div className="relative">
