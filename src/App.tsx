@@ -15,16 +15,17 @@ function App() {
 
   // Check URL for session parameters
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const sessionId = urlParams.get('session');
-    const partnerId = urlParams.get('partner');
-    const isShared = urlParams.get('shared');
-    
-    // Check if this is a shared collaborative session result
-    if (sessionId && isShared === 'true') {
-      // Load the collaborative session and convert to couple data
-      try {
-        const session = await sessionStorage.loadSession(sessionId);
+    const loadSessionFromURL = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const sessionId = urlParams.get('session');
+      const partnerId = urlParams.get('partner');
+      const isShared = urlParams.get('shared');
+      
+      // Check if this is a shared collaborative session result
+      if (sessionId && isShared === 'true') {
+        // Load the collaborative session and convert to couple data
+        try {
+          const session = await sessionStorage.loadSession(sessionId);
         if (session && session.status === 'merged' && session.mergedData) {
           // Convert to couple data and show dashboard
           const newCouple: Couple = {
@@ -44,6 +45,14 @@ function App() {
       } catch (error) {
         console.error('Failed to load shared session:', error);
       }
+    }
+
+    // Check if this is a URL-based collaborative session (with data parameter)
+    const data = urlParams.get('data');
+    if (data && sessionId && sessionId.startsWith('collab-')) {
+      // This is a URL-based collaborative session
+      setCurrentStep('collaborative');
+      return;
     }
     
     // Check if this is a collaborative session
@@ -76,6 +85,9 @@ function App() {
       // Always ensure we start at welcome if no couple exists
       setCurrentStep('welcome');
     }
+    };
+
+    loadSessionFromURL();
   }, [couple]);
 
   const handleCreateCouple = (partner1Name: string, partner2Name: string, mode: 'together' | 'individual' | 'collaborative') => {

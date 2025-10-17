@@ -328,5 +328,5 @@ export function createSessionStorage(
   }
 }
 
-// Default export for easy usage
-export const sessionStorage = createSessionStorage('local'); // Change to 'firebase' or 'supabase' for production
+// Default export for easy usage - URL storage for production-ready collaborative sessions
+export const sessionStorage = createSessionStorage('url');

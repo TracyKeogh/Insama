@@ -19,6 +19,7 @@ export const CollaborativeSessionManager: React.FC<CollaborativeSessionManagerPr
   const [session, setSession] = useState<CollaborativeSession | null>(null);
   const [currentPartner, setCurrentPartner] = useState<'partner1' | 'partner2' | null>(null);
   const [showConflictResolution, setShowConflictResolution] = useState(false);
+  const [showSaveIndicator, setShowSaveIndicator] = useState(false);
 
   useEffect(() => {
     const initializeSession = async () => {
@@ -74,6 +75,10 @@ export const CollaborativeSessionManager: React.FC<CollaborativeSessionManagerPr
     try {
       await sessionStorage.saveSession(updatedSession.id, updatedSession);
       setSession(updatedSession);
+      
+      // Show save indicator for URL storage
+      setShowSaveIndicator(true);
+      setTimeout(() => setShowSaveIndicator(false), 2000);
     } catch (error) {
       console.error('Failed to save session:', error);
       // You might want to show an error message to the user here
@@ -274,6 +279,7 @@ export const CollaborativeSessionManager: React.FC<CollaborativeSessionManagerPr
         onPartnerSelected={setCurrentPartner}
         generatePartnerLink={generatePartnerLink}
         copyToClipboard={copyToClipboard}
+        showSaveIndicator={showSaveIndicator}
       />
     );
   }
@@ -294,7 +300,8 @@ const PartnerLinkSharing: React.FC<{
   onPartnerSelected: (partner: 'partner1' | 'partner2') => void;
   generatePartnerLink: (partnerId: 'partner1' | 'partner2') => string;
   copyToClipboard: (text: string) => void;
-}> = ({ session, onPartnerSelected, generatePartnerLink, copyToClipboard }) => {
+  showSaveIndicator?: boolean;
+}> = ({ session, onPartnerSelected, generatePartnerLink, copyToClipboard, showSaveIndicator }) => {
   return (
     <div className="min-h-screen bg-gray-50 pt-16">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -306,6 +313,14 @@ const PartnerLinkSharing: React.FC<{
               Share these links with your partner. Each person will complete their section independently, 
               then we'll show you any conflicts to resolve together.
             </p>
+            
+            {showSaveIndicator && (
+              <div className="mb-6 p-3 bg-green-50 border border-green-200 rounded-lg">
+                <p className="text-green-800 text-sm">
+                  ✅ Data automatically saved to URL - share this link to sync with your partner!
+                </p>
+              </div>
+            )}
             
             <div className="grid md:grid-cols-2 gap-6 mb-8">
               <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
